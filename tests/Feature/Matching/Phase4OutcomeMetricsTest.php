@@ -2,17 +2,17 @@
 
 use App\Models\CandidateRecommendationFeedback;
 use App\Models\Conversation;
+use App\Models\EmployerRecommendationFeedback;
 use App\Models\EmployerShortlist;
-use App\Models\Job;
 use App\Models\JobApplication;
 use App\Models\MatchOutcomeEvent;
 use App\Models\MatchSnapshot;
 use App\Services\CandidateFeedbackSignalService;
 use App\Services\JobMatchingService;
 use App\Services\MatchAnalyticsService;
+use App\Services\MatchingEngineService;
 use App\Services\MatchOutcomeService;
 use App\Services\MatchSnapshotService;
-use App\Services\MatchingEngineService;
 use Carbon\Carbon;
 
 /**
@@ -23,7 +23,6 @@ use Carbon\Carbon;
  * Synthetic data only (no real personal data). Uses the phase4* helpers defined
  * in GoldenMatchingCasesTest.php.
  */
-
 beforeEach(function () {
     $this->phase4OutcomeConfig = [
         'matching.recommendation.negative_signal' => config('matching.recommendation.negative_signal'),
@@ -570,7 +569,7 @@ it('role-gates employer feedback and keeps one row per candidate', function () {
         ->post(route('employer.feedback.store', ['candidate' => $candidate, 'feedback' => 'not_interested']))
         ->assertRedirect();
 
-    $rows = App\Models\EmployerRecommendationFeedback::get();
+    $rows = EmployerRecommendationFeedback::get();
 
     expect($rows)->toHaveCount(2)
         ->and($rows->pluck('feedback_key')->all())->toContain(

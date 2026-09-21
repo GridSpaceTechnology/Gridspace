@@ -11,6 +11,8 @@ class CandidateProfile extends Model
         'user_id',
         'current_role',
         'desired_role',
+        'desired_category_id',
+        'desired_role_id',
         'years_of_experience',
         'industry',
         'employment_type_preference',
@@ -32,5 +34,15 @@ class CandidateProfile extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function desiredCategory(): BelongsTo
+    {
+        return $this->belongsTo(JobCategory::class, 'desired_category_id');
+    }
+
+    public function desiredRole(): BelongsTo
+    {
+        return $this->belongsTo(JobRole::class, 'desired_role_id');
     }
 }

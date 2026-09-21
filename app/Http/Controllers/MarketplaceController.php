@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\CandidateCardResource;
 use App\Http\Resources\JobResource;
+use App\Jobs\SendNewApplicationNotification;
 use App\Models\Job;
 use App\Services\CandidateBehavioralProfileService;
 use App\Services\JobSearchService;
@@ -175,6 +176,8 @@ class MarketplaceController extends Controller
 
         $this->behavior->recordApply($candidate, $job);
         $this->outcomes->jobApplied($candidate, $job, $application, $matchScore);
+
+        SendNewApplicationNotification::notify($application);
 
         return response()->json([
             'message' => 'Application submitted successfully',

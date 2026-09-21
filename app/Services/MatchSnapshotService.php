@@ -24,8 +24,11 @@ use App\Models\User;
 class MatchSnapshotService
 {
     public const SOURCE_RECOMMENDED = 'recommended';
+
     public const SOURCE_VIEWED = 'viewed';
+
     public const SOURCE_APPLIED = 'applied';
+
     public const SOURCE_MANUAL = 'manual';
 
     public function __construct(

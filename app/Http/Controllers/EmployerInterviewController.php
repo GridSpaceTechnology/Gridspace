@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 class EmployerInterviewController extends Controller
 {
     public function __construct(protected MatchOutcomeService $outcomes) {}
+
     public function index(Request $request)
     {
         $user = Auth::user();

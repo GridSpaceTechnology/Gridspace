@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendNewApplicationNotification;
 use App\Models\Job;
 use App\Models\JobApplication;
 use App\Models\User;
@@ -112,6 +113,8 @@ class CandidateDashboardController extends Controller
 
         $this->behavior->recordApply($user, $job);
         $this->outcomes->jobApplied($user, $job, $application, $matchScores['total_score'] ?? 0);
+
+        SendNewApplicationNotification::notify($application);
 
         return back()->with('success', 'Application submitted successfully!');
     }

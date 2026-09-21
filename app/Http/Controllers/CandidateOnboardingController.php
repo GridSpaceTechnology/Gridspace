@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Jobs\RecalculateCandidateMatches;
+use App\Models\JobRole;
 use App\Models\PersonalityQuestion;
 use App\Models\User;
 use App\Services\PersonalityAssessmentService;
@@ -177,6 +178,29 @@ class CandidateOnboardingController extends Controller
             1 => [
                 'current_role' => 'nullable|string|max:255',
                 'desired_role' => 'nullable|string|max:255',
+                'desired_category_id' => 'nullable|exists:job_categories,id',
+                'desired_role_id' => [
+                    'nullable',
+                    'exists:job_roles,id',
+                    function ($attribute, $value, $fail) {
+                        if ($value === null) {
+                            return;
+                        }
+
+                        $role = JobRole::find($value);
+
+                        if ($role === null) {
+                            return;
+                        }
+
+                        if (
+                            request()->input('desired_category_id') !== null
+                            && (int) request()->input('desired_category_id') !== (int) $role->category_id
+                        ) {
+                            $fail('The selected desired role does not belong to the selected category.');
+                        }
+                    },
+                ],
                 'years_of_experience' => 'nullable|integer|min:0|max:50',
                 'industry' => 'nullable|string|max:255',
                 'employment_type_preference' => ['nullable', Rule::in(['full-time', 'part-time', 'contract', 'freelance'])],
@@ -240,6 +264,8 @@ class CandidateOnboardingController extends Controller
         $profile->fill($request->only([
             'current_role',
             'desired_role',
+            'desired_category_id',
+            'desired_role_id',
             'years_of_experience',
             'industry',
             'employment_type_preference',

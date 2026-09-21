@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Jobs\SendNewApplicationNotification;
 use App\Models\Job;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -48,7 +49,7 @@ class JobApplicationService
 
     public function createJobApplication(User $candidate, Job $job, ?string $note = null): JobApplication
     {
-        return DB::transaction(function () use ($candidate, $job, $note) {
+        $application = DB::transaction(function () use ($candidate, $job, $note) {
             $matchData = $this->calculateMatchData($candidate, $job);
 
             $application = JobApplication::create([
@@ -64,6 +65,10 @@ class JobApplicationService
 
             return $application;
         });
+
+        SendNewApplicationNotification::notify($application);
+
+        return $application;
     }
 
     public function calculateMatchData(User $candidate, Job $job): array

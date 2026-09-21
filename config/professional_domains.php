@@ -172,6 +172,45 @@ return [
             ],
         ],
 
+        'engineering' => [
+            'label' => 'Engineering / Technical Services',
+            'keywords' => [
+                // Compound keywords only: bare 'engineer' stays classified as
+                // the technology domain so Software Engineers are not misrouted.
+                'electrical engineer', 'mechanical engineer',
+                'technical support engineer', 'field engineer',
+                'network engineer', 'hardware engineer', 'automation engineer',
+                'industrial engineer', 'production engineer',
+                'quality engineer', 'instrumentation engineer',
+                'autocad', 'technical drawing', 'plc', 'scada', 'cad drafter',
+            ],
+        ],
+
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Related Professional Domains
+    |--------------------------------------------------------------------------
+    |
+    | Adjacent domains are allowed to relate when the profile provides
+    | supporting evidence (skills, experience). They are never treated as
+    | equivalents and never exempt the hard gate on their own; the shared
+    | relationship only means an otherwise cross-domain score is not
+    | automatically hard-capped, so supporting components can contribute.
+    |
+    */
+
+    'related' => [
+        'sales' => ['marketing', 'customer_support'],
+        'marketing' => ['sales', 'design', 'media', 'customer_support'],
+        'design' => ['marketing', 'media'],
+        'media' => ['marketing', 'design'],
+        'customer_support' => ['sales', 'marketing', 'administration'],
+        'administration' => ['customer_support'],
+        'technology' => ['engineering'],
+        'engineering' => ['technology', 'construction'],
+        'construction' => ['engineering'],
     ],
 
 ];

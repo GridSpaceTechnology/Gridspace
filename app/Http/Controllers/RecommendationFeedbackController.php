@@ -58,7 +58,7 @@ class RecommendationFeedbackController extends Controller
     protected function storeCandidateFeedback(int $candidateId, int $jobId, CandidateRecommendationFeedbackType $type): void
     {
         $feedback = CandidateRecommendationFeedback::firstWhere('feedback_key', "c:{$candidateId}:{$jobId}")
-            ?? new CandidateRecommendationFeedback();
+            ?? new CandidateRecommendationFeedback;
 
         $feedback->forceFill([
             'candidate_id' => $candidateId,
@@ -74,7 +74,7 @@ class RecommendationFeedbackController extends Controller
         $key = "e:{$employerId}:{$candidateId}:".($jobId ?? 'none');
 
         $feedback = EmployerRecommendationFeedback::firstWhere('feedback_key', $key)
-            ?? new EmployerRecommendationFeedback();
+            ?? new EmployerRecommendationFeedback;
 
         $feedback->forceFill([
             'employer_id' => $employerId,

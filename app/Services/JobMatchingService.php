@@ -103,15 +103,24 @@ class JobMatchingService
 
         $overall = $totalWeight > 0 ? (int) round($weighted / $totalWeight) : 0;
 
-        $candidateDomain = $this->getDomain($candidate->candidateProfile?->desired_role ?? '');
-        $jobDomain = $this->getDomain(trim(($job->title ?? '').' '.($job->role ?? '')));
-        $domainCompatible = $this->isDomainCompatible($candidateDomain, $jobDomain);
+        $candidateDomains = $this->resolveCandidateDomains($candidate);
+        $jobDomains = $this->resolveJobDomains($job);
+        $domainsCompatible = $this->isDomainsCompatible($candidateDomains, $jobDomains);
 
-        $gateApplied = $candidateDomain !== null && $jobDomain !== null && ! $domainCompatible;
+        // The behavioural, semantic and search-history signals are never allowed
+        // to paper over a genuinely incompatible professional pairing. When
+        // both sides carry evidence the overall score is hard-capped below the
+        // "potential" band so a wrong-field relationship cannot be recommended.
+        $gateApplied = $candidateDomains !== [] && $jobDomains !== [] && ! $domainsCompatible;
 
         if ($gateApplied) {
             $overall = min($overall, (int) config('matching.domain_gate_cap', 15));
         }
+
+        // Legacy single-domain fields for consumers that still read strings.
+        $candidateDomain = $candidateDomains[0] ?? null;
+        $jobDomain = $jobDomains[0] ?? null;
+        $domainCompatible = $domainsCompatible;
 
         $overall = max(0, min(100, $overall));
 
@@ -187,6 +196,114 @@ class JobMatchingService
         }
 
         return $topScore > $secondScore ? $topDomain : null;
+    }
+
+    /**
+     * Resolve the full set of professional domains for a candidate, preferring
+     * official taxonomy links (desired category + role) and falling back to the
+     * legacy keyword classifier. Returns an empty array when neither taxonomy
+     * nor keyword evidence is present - an empty array never hard-gates.
+     *
+     * @return array<int, string>
+     */
+    public function resolveCandidateDomains(User $candidate): array
+    {
+        $domains = [];
+
+        $profile = $candidate->candidateProfile;
+        $category = $profile?->desiredCategory;
+        $role = $profile?->desiredRole;
+
+        foreach ((array) ($category?->domain_keys ?? []) as $key) {
+            if (is_string($key) && $key !== '') {
+                $domains[$key] = true;
+            }
+        }
+
+        if ($role !== null) {
+            $detected = $this->getDomain((string) $role->name);
+
+            if ($detected !== null) {
+                $domains[$detected] = true;
+            }
+        }
+
+        $legacy = $this->getDomain((string) ($profile?->desired_role ?? ''));
+
+        if ($legacy !== null) {
+            $domains[$legacy] = true;
+        }
+
+        return array_keys($domains);
+    }
+
+    /**
+     * Resolve the full set of professional domains for a job, preferring
+     * official taxonomy links (category + role) over the keyword classifier.
+     *
+     * @return array<int, string>
+     */
+    public function resolveJobDomains(Job $job): array
+    {
+        $domains = [];
+
+        foreach ((array) ($job->professionalCategory?->domain_keys ?? []) as $key) {
+            if (is_string($key) && $key !== '') {
+                $domains[$key] = true;
+            }
+        }
+
+        if ($job->professionalRole !== null) {
+            $detected = $this->getDomain((string) $job->professionalRole->name);
+
+            if ($detected !== null) {
+                $domains[$detected] = true;
+            }
+        }
+
+        $legacy = $this->getDomain(trim((string) ($job->title ?? '').' '.(string) ($job->role ?? '')));
+
+        if ($legacy !== null) {
+            $domains[$legacy] = true;
+        }
+
+        return array_keys($domains);
+    }
+
+    /**
+     * Array-based domain compatibility: shared domain, or an explicitly
+     * related domain edge from config ('professional_domains.related').
+     * Related edges are adjacency evidence, never equivalence - a related pair
+     * is still scored on token overlap, skills and experience rather than being
+     * treated as the same role. Two disjoint, unrelated arrays are hard
+     * incompatible.
+     *
+     * @param  array<int, string>  $candidateDomains
+     * @param  array<int, string>  $jobDomains
+     */
+    public function isDomainsCompatible(array $candidateDomains, array $jobDomains): bool
+    {
+        if ($candidateDomains === [] || $jobDomains === []) {
+            return true;
+        }
+
+        $shared = array_intersect($candidateDomains, $jobDomains);
+
+        if ($shared !== []) {
+            return true;
+        }
+
+        $related = config('professional_domains.related', []);
+
+        foreach ($candidateDomains as $candidate) {
+            foreach ($jobDomains as $job) {
+                if (isset($related[$candidate]) && in_array($job, $related[$candidate], true)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**

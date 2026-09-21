@@ -16,6 +16,8 @@ class Job extends Model
         'title',
         'slug',
         'role',
+        'category_id',
+        'role_id',
         'location',
         'location_country',
         'description',
@@ -59,6 +61,16 @@ class Job extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function professionalCategory(): BelongsTo
+    {
+        return $this->belongsTo(JobCategory::class, 'category_id');
+    }
+
+    public function professionalRole(): BelongsTo
+    {
+        return $this->belongsTo(JobRole::class, 'role_id');
     }
 
     public function jobSkills(): HasMany

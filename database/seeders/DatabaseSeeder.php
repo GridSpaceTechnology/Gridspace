@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AdminUserSeeder::class,
+            TaxonomySeeder::class,
             GridSpacePersonalityAssessmentSeeder::class,
             VerificationTypeSeeder::class,
 
