@@ -108,7 +108,7 @@ class MatchChecksumService
             ->values()
             ->all();
 
-        $culture = EmployerCultureProfile::where('employer_id', $job->employer_id)->first();
+        $culture = EmployerCultureProfile::where('user_id', $job->employer_id)->first();
 
         return [
             'title' => (string) $job->title,

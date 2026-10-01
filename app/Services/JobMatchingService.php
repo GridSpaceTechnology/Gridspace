@@ -907,7 +907,7 @@ class JobMatchingService
             ];
         }
 
-        $hasEmployerCulture = EmployerCultureProfile::where('employer_id', $job->employer_id)->exists();
+        $hasEmployerCulture = EmployerCultureProfile::where('user_id', $job->employer_id)->exists();
         $hasJobPreferences = $job->temperament_preference !== null
             || ! empty($job->personality_preferences_json)
             || $hasEmployerCulture;
