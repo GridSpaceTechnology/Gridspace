@@ -19,7 +19,7 @@ return new class extends Migration
             $table->timestamp('acted_at');
             $table->timestamps();
 
-            $table->index(['user_id', 'interaction_type', 'acted_at'], 'cji_user_type_acted_at_index');
+            $table->index(['user_id', 'interaction_type', 'acted_at'], 'candidate_job_interactions_user_type_acted_idx');
             $table->index(['user_id', 'job_id']);
         });
     }

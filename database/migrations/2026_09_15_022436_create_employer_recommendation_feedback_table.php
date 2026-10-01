@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('feedback_key', 160)->unique();
             $table->timestamps();
 
-            $table->index(['employer_id', 'feedback_type']);
+            $table->index(['employer_id', 'feedback_type'], 'employer_recommendation_feedback_employer_type_idx');
             $table->index(['candidate_id']);
 
             $table->foreign('employer_id')->references('id')->on('users')->cascadeOnDelete();
