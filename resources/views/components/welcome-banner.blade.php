@@ -29,7 +29,7 @@
     x-transition:leave="transition ease-in duration-300"
     x-transition:leave-start="opacity-100"
     x-transition:leave-end="opacity-0"
-    x-init="setTimeout(() => { dismissed = true; @this.call('dismiss'); }, 5000)"
+    x-init="setTimeout(() => { dismissed = true; welcomeDismiss(); }, 5000)"
     class="mb-6 bg-brand-secondary rounded-xl shadow-lg overflow-hidden"
 >
     <div class="p-6">
@@ -61,7 +61,7 @@
                 </div>
             </div>
             <button 
-                @click="dismissed = true; @this.call('dismiss')" 
+                @click="dismissed = true; welcomeDismiss()" 
                 type="button"
                 class="text-white/80 hover:text-white transition-colors"
             >

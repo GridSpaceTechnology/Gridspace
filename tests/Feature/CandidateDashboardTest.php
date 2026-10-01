@@ -79,6 +79,22 @@ test('candidate who uploads a cv in onboarding can open the dashboard', function
     $this->actingAs($candidate)->get(route('candidate.dashboard'))->assertOk();
 });
 
+test('welcome banner dismisses through the route instead of a livewire directive', function () {
+    $this->withoutVite();
+
+    $candidate = dashboardCandidate();
+    $candidate->forceFill(['onboarding_completed' => true])->save();
+
+    $this->actingAs($candidate)->get(route('candidate.dashboard'))
+        ->assertOk()
+        ->assertDontSee('@this', false)
+        ->assertSee('welcomeDismiss()', false);
+
+    $this->actingAs($candidate)->postJson(route('welcome.dismiss'))->assertOk();
+
+    expect($candidate->fresh()->welcome_dismissed_at)->not->toBeNull();
+});
+
 test('match checksum includes the employer culture profile', function () {
     $employer = User::factory()->create(['role' => 'employer']);
     $job = dashboardJob($employer);
